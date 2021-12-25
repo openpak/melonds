@@ -343,7 +343,7 @@ int LoadROM(const u8 *romdata, u32 romlength, const char *archivefilename, const
 
     NDS::SetConsoleType(Config::ConsoleType);
 
-    if (slot == ROMSlot_NDS && NDS::LoadROM(romdata, romlength, SRAMPath[slot].c_str(), directboot))
+/*    if (slot == ROMSlot_NDS && NDS::LoadROM(romdata, romlength, SRAMPath[slot].c_str(), directboot))
     {
         SavestateLoaded = false;
 
@@ -363,7 +363,7 @@ int LoadROM(const u8 *romdata, u32 romlength, const char *archivefilename, const
         PrevSRAMPath[slot] = SRAMPath[slot]; // safety
         return Load_OK;
     }
-    else
+    else*/
     {
         ROMPath[slot] = oldpath;
         SRAMPath[slot] = oldsram;
@@ -423,7 +423,7 @@ int LoadROM(const char* file, int slot)
 
     NDS::SetConsoleType(Config::ConsoleType);
 
-    if (slot == ROMSlot_NDS && NDS::LoadROM(ROMPath[slot].c_str(), SRAMPath[slot].c_str(), directboot))
+    /*if (slot == ROMSlot_NDS && NDS::LoadROM(ROMPath[slot].c_str(), SRAMPath[slot].c_str(), directboot))
     {
         SavestateLoaded = false;
 
@@ -443,7 +443,7 @@ int LoadROM(const char* file, int slot)
         PrevSRAMPath[slot] = SRAMPath[slot]; // safety
         return Load_OK;
     }
-    else
+    else*/
     {
         ROMPath[slot] = oldpath;
         SRAMPath[slot] = oldsram;
@@ -577,7 +577,7 @@ int Reset()
     {
         NDS::LoadBIOS();
     }
-    else
+    /*else
     {
         std::string ext = ROMPath[ROMSlot_NDS].substr(ROMPath[ROMSlot_NDS].length() - 4);
         std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
@@ -611,7 +611,7 @@ int Reset()
 
             bool ok = NDS::LoadROM(romdata, romlen, sramfilename, directboot);
             delete romdata;
-            if (!ok)*/
+            if (!ok)*-/
                 return Load_ROMLoadError;
         }
 #endif
@@ -650,11 +650,11 @@ int Reset()
 
             bool ok = NDS::LoadGBAROM(romdata, romlen, romfilename, SRAMPath[ROMSlot_GBA]);
             delete romdata;
-            if (!ok)*/
+            if (!ok)*-/
                 return Load_ROMLoadError;
         }
 #endif
-    }
+    }*/
 
     LoadCheats();
 
@@ -735,7 +735,7 @@ bool LoadState(std::string filename)
             // TODO: how should this interact with custom paths?
             SRAMPath[ROMSlot_NDS] = filename + ".sav";
 
-            NDS::RelocateSave(SRAMPath[ROMSlot_NDS].c_str(), false);
+//            NDS::RelocateSave(SRAMPath[ROMSlot_NDS].c_str(), false);
         }
 
         bool loadedPartialGBAROM = false;
@@ -783,7 +783,7 @@ bool SaveState(std::string filename)
             // TODO: how should this interact with custom paths?
             SRAMPath[ROMSlot_NDS] = filename + ".sav";
 
-            NDS::RelocateSave(SRAMPath[ROMSlot_NDS].c_str(), true);
+     //       NDS::RelocateSave(SRAMPath[ROMSlot_NDS].c_str(), true);
         }
     }
 
@@ -804,13 +804,13 @@ void UndoStateLoad()
     if (!ROMPath[ROMSlot_NDS].empty())
     {
         SRAMPath[ROMSlot_NDS] = PrevSRAMPath[ROMSlot_NDS];
-        NDS::RelocateSave(SRAMPath[ROMSlot_NDS].c_str(), false);
+//        NDS::RelocateSave(SRAMPath[ROMSlot_NDS].c_str(), false);
     }
 }
 
 int ImportSRAM(const char* filename)
 {
-    FILE* file = fopen(filename, "rb");
+    /*FILE* file = fopen(filename, "rb");
     fseek(file, 0, SEEK_END);
     u32 size = ftell(file);
     u8* importData = new u8[size];
@@ -820,7 +820,8 @@ int ImportSRAM(const char* filename)
 
     int diff = NDS::ImportSRAM(importData, size);
     delete[] importData;
-    return diff;
+    return diff;*/
+    return 0;
 }
 
 void EnableCheats(bool enable)
