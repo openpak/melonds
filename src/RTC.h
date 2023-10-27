@@ -48,6 +48,9 @@ void DeInit();
 void Reset();
 void DoSavestate(Savestate* file);
 
+void GetState(StateData& state);
+void SetState(StateData& state);
+void SetDateTime(int year, int month, int day, int hour, int minute, int second);
 void ResetState();
 
 void ScheduleTimer(bool first);
