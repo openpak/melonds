@@ -24,9 +24,7 @@
 #include "UcodeBase.h"
 #include "../Savestate.h"
 
-namespace melonDS
-{
-namespace DSP_HLE
+namespace melonDS::DSP_HLE
 {
 
 class GraphicsUcode : public UcodeBase
@@ -56,7 +54,6 @@ protected:
     void CmdYuvToRgb();
 };
 
-}
 }
 
 #endif // GRAPHICSUCODE_H
