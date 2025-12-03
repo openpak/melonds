@@ -19,10 +19,12 @@ struct sOAM
 layout(std140) uniform uConfig
 {
     int uVRAMMask;
+    ivec4 uRotscale[32];
     sOAM uOAM[128];
 };
 
 in ivec2 vPosition;
+in ivec2 vTexcoord;
 in int vSpriteIndex;
 
 flat out int fSpriteIndex;
@@ -30,12 +32,17 @@ smooth out vec2 fTexcoord;
 
 void main()
 {
-    ivec2 sprpos = ivec2((vSpriteIndex & 0xF) * 64, (vSpriteIndex >> 4) * 64);
-    ivec2 sprsize = uOAM[vSpriteIndex].Size;
-    vec2 vtxpos = vec2(sprpos) + (vPosition * vec2(sprsize));
-    vec2 fbsize = vec2(1024, 512);
+    vec2 sprsize = vec2(uOAM[vSpriteIndex].BoundSize);
+    vec2 fbsize = vec2(256, 192);
 
-    gl_Position = vec4(((vtxpos * 2) / fbsize) - 1, 0, 1);
+    gl_Position = vec4(((vec2(vPosition) * 2) / fbsize) - 1, 0, 1);
     fSpriteIndex = vSpriteIndex;
-    fTexcoord = vPosition * vec2(sprsize);
+
+    if (uOAM[vSpriteIndex].Rotscale == -1)
+    {
+        vec2 tmp = vec2(vTexcoord) * sprsize;
+        fTexcoord = mix(tmp, (sprsize - tmp), uOAM[vSpriteIndex].Flip);
+    }
+    else
+        fTexcoord = (vec2(vTexcoord) * sprsize) - (sprsize / 2);
 }
