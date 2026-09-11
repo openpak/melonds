@@ -63,8 +63,6 @@ DefaultList<int> DefaultInts =
     {"Instance*.Firmware.BirthdayDay", 1},
     {"MP.AudioMode", 1},
     {"MP.RecvTimeout", 25},
-    {"LAN.OpenPak", false},
-    {"LAN.OpenPakServer", "145.241.199.19"},
     {"Instance*.Audio.Volume", 256},
     {"Mic.InputType", 1},
     {"Mouse.HideSeconds", 5},
@@ -97,6 +95,7 @@ RangeList IntRanges =
 
 DefaultList<bool> DefaultBools =
 {
+    {"LAN.OpenPak", false},
     {"Screen.Filter", true},
     {"3D.Soft.Threaded", true},
     {"3D.GL.HiresCoordinates", true},
@@ -118,6 +117,7 @@ DefaultList<bool> DefaultBools =
 
 DefaultList<std::string> DefaultStrings =
 {
+    {"LAN.OpenPakServer", "145.241.199.19"},
     {"DLDI.ImagePath",                  "dldi.bin"},
     {"DSi.SD.ImagePath",                "dsisd.bin"},
     {"Instance*.Firmware.Username",     "melonDS"}
