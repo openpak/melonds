@@ -1,0 +1,62 @@
+name: OpenPak release
+
+# Tag openpak-v1.2.3: Linux x86_64 and aarch64 AppImages (upstream's Ubuntu recipe) on a Release.
+on:
+  push:
+    tags: ['openpak-v*']
+  workflow_dispatch:
+
+env:
+  MELONDS_GIT_HASH: ${{ github.sha }}
+  MELONDS_BUILD_PROVIDER: OpenPak
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch:
+          - runner: ubuntu-22.04
+            name: x86_64
+          - runner: ubuntu-22.04-arm
+            name: aarch64
+    name: ${{ matrix.arch.name }}
+    runs-on: ${{ matrix.arch.runner }}
+    steps:
+    - uses: actions/checkout@v4
+    - run: |
+        sudo apt update
+        sudo apt install --allow-downgrades cmake ninja-build extra-cmake-modules libpcap0.8-dev libsdl2-dev libenet-dev \
+          qt6-{base,base-private,multimedia}-dev qt6-wayland libqt6svg6-dev libarchive-dev libzstd-dev libfuse2 libfaad-dev
+    - run: cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DMELONDS_EMBED_BUILD_INFO=ON
+    - run: |
+        cmake --build build
+        DESTDIR=AppDir cmake --install build
+    - run: |
+        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.arch.name }}.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${{ matrix.arch.name }}.AppImage
+        chmod a+x linuxdeploy-*.AppImage
+    - env:
+        EXTRA_PLATFORM_PLUGINS: libqwayland-egl.so;libqwayland-generic.so
+        EXTRA_QT_PLUGINS: waylandcompositor
+        QMAKE: /usr/lib/qt6/bin/qmake
+      run: |
+        ./linuxdeploy-${{ matrix.arch.name }}.AppImage --appdir AppDir --plugin qt --output appimage
+        mv melonDS*.AppImage melonDS-openpak-${GITHUB_REF_NAME}-${{ matrix.arch.name }}.AppImage
+    - uses: actions/upload-artifact@v4
+      with:
+        name: melonDS-openpak-${{ matrix.arch.name }}
+        path: melonDS-openpak-*.AppImage
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/openpak-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - run: gh release create "${GITHUB_REF_NAME}" artifacts/* --repo "${GITHUB_REPOSITORY}" --title "melonDS ${GITHUB_REF_NAME} (OpenPak)" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

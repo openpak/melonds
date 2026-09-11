@@ -111,6 +111,7 @@ void NetInit()
         net.SetDriver(std::make_unique<Net_Slirp>([](const u8* data, int len) {
             net.RXEnqueue(data, len);
         }));
+        Net_Slirp::SetOpenPakServer(cfg.GetBool("LAN.OpenPak") ? cfg.GetString("LAN.OpenPakServer") : "");
     }
 }
 

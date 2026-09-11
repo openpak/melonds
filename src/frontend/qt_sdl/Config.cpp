@@ -63,6 +63,8 @@ DefaultList<int> DefaultInts =
     {"Instance*.Firmware.BirthdayDay", 1},
     {"MP.AudioMode", 1},
     {"MP.RecvTimeout", 25},
+    {"LAN.OpenPak", false},
+    {"LAN.OpenPakServer", "145.241.199.19"},
     {"Instance*.Audio.Volume", 256},
     {"Mic.InputType", 1},
     {"Mouse.HideSeconds", 5},
