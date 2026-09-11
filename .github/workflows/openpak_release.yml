@@ -47,8 +47,70 @@ jobs:
       with:
         name: melonDS-openpak-${{ matrix.arch.name }}
         path: melonDS-openpak-*.AppImage
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - name: x86_64
+            image: windows-2022
+    name: windows ${{ matrix.arch.name }}
+    runs-on: ${{ matrix.arch.image }}
+    env:
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/vcpkg_cache
+        key: vcpkg-${{ matrix.arch.name }}-windows-${{ hashFiles('vcpkg.json') }}
+    - uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: vcpkg.json
+    - uses: lukka/run-cmake@v10
+      with:
+        configurePreset: release-windows-${{ matrix.arch.name }}
+        configurePresetAdditionalArgs: "['-DENABLE_DEBUG_DEPS=OFF', '-DMELONDS_EMBED_BUILD_INFO=ON']"
+        buildPreset: release-windows-${{ matrix.arch.name }}
+    - shell: bash
+      run: cp build/release-windows-${{ matrix.arch.name }}/melonDS.exe melonDS-openpak-${GITHUB_REF_NAME}-windows-${{ matrix.arch.name }}.exe
+    - uses: actions/upload-artifact@v4
+      with:
+        name: melonDS-openpak-windows-${{ matrix.arch.name }}
+        path: melonDS-openpak-*.exe
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64]
+    name: macos ${{ matrix.arch }}
+    runs-on: macos-14
+    env:
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install autoconf automake autoconf-archive libtool python-setuptools
+      - uses: lukka/get-cmake@latest
+      - uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ matrix.arch }}-osx-${{ hashFiles('vcpkg.json') }}
+      - uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgJsonGlob: vcpkg.json
+      - uses: lukka/run-cmake@v10
+        with:
+          configurePreset: release-mac-${{ matrix.arch }}
+          buildPreset: release-mac-${{ matrix.arch }}
+          configurePresetAdditionalArgs: "['-DMELONDS_EMBED_BUILD_INFO=ON']"
+      - run: |
+          cd build/release-mac-${{ matrix.arch }} && zip -r -y ../../melonDS-openpak-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.zip melonDS.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: melonDS-openpak-macos-${{ matrix.arch }}
+          path: melonDS-openpak-*.zip
   release:
-    needs: build
+    needs: [build, windows, macos]
     if: startsWith(github.ref, 'refs/tags/openpak-v')
     runs-on: ubuntu-latest
     permissions:
