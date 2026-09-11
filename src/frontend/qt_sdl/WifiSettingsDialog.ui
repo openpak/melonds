@@ -67,6 +67,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="cbOpenPak">
+        <property name="text">
+         <string>Connect Nintendo WFC to OpenPak (nintendowifi.net and gamespy.com resolve to the OpenPak server)</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

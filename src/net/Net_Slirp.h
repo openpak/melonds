@@ -40,6 +40,8 @@ class Net_Slirp : public NetDriver
 {
 public:
     explicit Net_Slirp(const Platform::SendPacketCallback& callback) noexcept;
+    // OpenPak: empty = off; otherwise the dotted-quad every Nintendo WFC / GameSpy / openpak.org name resolves to.
+    static void SetOpenPakServer(const std::string& server) noexcept;
     Net_Slirp(const Net_Slirp&) = delete;
     Net_Slirp& operator=(const Net_Slirp&) = delete;
     Net_Slirp(Net_Slirp&& other) noexcept;

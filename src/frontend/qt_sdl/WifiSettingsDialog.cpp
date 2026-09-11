@@ -81,6 +81,7 @@ WifiSettingsDialog::WifiSettingsDialog(QWidget* parent) : QDialog(parent), ui(ne
     // errrr???
     bool direct = cfg.GetBool("LAN.DirectMode");
     ui->rbDirectMode->setChecked(direct);
+    ui->cbOpenPak->setChecked(cfg.GetBool("LAN.OpenPak"));
     ui->rbIndirectMode->setChecked(!direct);
     if (!haspcap) ui->rbDirectMode->setEnabled(false);
 
@@ -108,6 +109,7 @@ void WifiSettingsDialog::done(int r)
         auto& cfg = emuInstance->getGlobalConfig();
 
         cfg.SetBool("LAN.DirectMode", ui->rbDirectMode->isChecked());
+        cfg.SetBool("LAN.OpenPak", ui->cbOpenPak->isChecked());
 
         int sel = ui->cbxDirectAdapter->currentIndex();
         if (sel < 0 || sel >= adapters.size()) sel = 0;

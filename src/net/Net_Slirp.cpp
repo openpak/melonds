@@ -20,6 +20,9 @@
 #include <string.h>
 #include "Net.h"
 #include "Net_Slirp.h"
+#include <string>
+#include <cstring>
+#include <strings.h>
 #include "FIFO.h"
 #include "Platform.h"
 
@@ -142,6 +145,22 @@ const SlirpCb Net_Slirp::cb =
     .unregister_poll_fd = SlirpCbUnregisterPollFD,
     .notify = SlirpCbNotify
 };
+
+static std::string OpenPakServer;
+
+void Net_Slirp::SetOpenPakServer(const std::string& server) noexcept { OpenPakServer = server; }
+
+static bool OpenPakName(const char* name)
+{
+    static const char* const suffixes[] = {".nintendowifi.net", ".gamespy.com", ".nintendo.net", ".openpak.org"};
+    size_t len = strlen(name);
+    for (const char* suffix : suffixes)
+    {
+        size_t n = strlen(suffix);
+        if (len >= n && strcasecmp(name + len - n, suffix) == 0) return true;
+    }
+    return false;
+}
 
 Net_Slirp::Net_Slirp(const Platform::SendPacketCallback& callback) noexcept : Callback(callback)
 {
@@ -322,7 +341,13 @@ void Net_Slirp::HandleDNSFrame(u8* data, int len) noexcept
 
 		memset(&dns_hint, 0, sizeof(dns_hint));
 		dns_hint.ai_family = AF_INET; // TODO: other address types (INET6, etc)
-		if (getaddrinfo(domainname, "0", &dns_hint, &dns_res) == 0)
+		if (!OpenPakServer.empty() && OpenPakName(domainname))
+		{
+		    // OpenPak: the DS asks for a Nintendo WFC name; answer with the OpenPak server (nn-wfc).
+		    addr_res = inet_addr(OpenPakServer.c_str());
+		    printf(" -> openpak %s", OpenPakServer.c_str());
+		}
+		else if (getaddrinfo(domainname, "0", &dns_hint, &dns_res) == 0)
         {
             struct addrinfo* p = dns_res;
             while (p)
