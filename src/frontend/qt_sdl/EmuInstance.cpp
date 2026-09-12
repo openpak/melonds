@@ -35,6 +35,7 @@
 #include "ArchiveUtil.h"
 #endif
 #include "EmuInstance.h"
+#include "OpenPak.h"
 #include "Config.h"
 #include "Platform.h"
 #include "Net.h"
@@ -1884,6 +1885,7 @@ bool EmuInstance::loadROM(QStringList filepath, bool reset, QString& errorstr)
     std::unique_ptr<u8[]> savedata = nullptr;
 
     std::string savname = getAssetPath(false, localCfg.GetString("SaveFilePath"), ".sav");
+    OpenPak::OnRomLoading(filedata.get(), filelen, savname);
     std::string origsav = savname;
     savname += instanceFileSuffix();
 
@@ -1975,7 +1977,8 @@ bool EmuInstance::loadROM(QStringList filepath, bool reset, QString& errorstr)
 
 void EmuInstance::ejectCart()
 {
-    ndsSave = nullptr;
+    ndsSave = nullptr; // the save manager flushes on its way out
+    OpenPak::OnRomClosed();
 
     if (emuIsActive())
     {
