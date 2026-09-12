@@ -28,6 +28,14 @@
 #include "Net_PCap.h"
 
 #include "WifiSettingsDialog.h"
+#include "OpenPak.h"
+#include <openpak/network_profile.h>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include "Net_Slirp.h"
+#include "Net.h"
+
+using namespace melonDS;
 #include "ui_WifiSettingsDialog.h"
 
 
@@ -86,6 +94,29 @@ WifiSettingsDialog::WifiSettingsDialog(QWidget* parent) : QDialog(parent), ui(ne
     if (!haspcap) ui->rbDirectMode->setEnabled(false);
 
     updateAdapterControls();
+
+    // OpenPak: account row (cloud saves) and the network profile refresh (EP-5).
+    auto* section = OpenPak::CreateWifiDialogSection(this);
+    auto* profile_row = new QWidget(this);
+    auto* profile_layout = new QHBoxLayout(profile_row);
+    profile_layout->setContentsMargins(0, 0, 0, 0);
+    auto* refresh_button = new QPushButton(tr("Refresh network settings"), profile_row);
+    connect(refresh_button, &QPushButton::clicked, this, [this] {
+        const auto applied = openpak::NetworkProfile::Refresh("ds");
+        if (applied.source != openpak::NetworkProfile::Source::BuiltIn)
+        {
+            auto suffixes = applied.profile.suffixes;
+            suffixes.insert(suffixes.end(), applied.profile.exact.begin(),
+                            applied.profile.exact.end());
+            Net_Slirp::SetOpenPakSuffixes(suffixes);
+            auto& cfg = emuInstance->getGlobalConfig();
+            if (cfg.GetBool("LAN.OpenPak") && !applied.profile.server_address.empty())
+                Net_Slirp::SetOpenPakServer(applied.profile.server_address);
+        }
+    });
+    profile_layout->addWidget(refresh_button);
+    ui->verticalLayout->addWidget(profile_row);
+    ui->verticalLayout->addWidget(section);
 }
 
 WifiSettingsDialog::~WifiSettingsDialog()

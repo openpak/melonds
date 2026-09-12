@@ -1,0 +1,3 @@
+[submodule "Externals/openpak-client"]
+	path = Externals/openpak-client
+	url = https://github.com/openpak/openpak-client.git

@@ -3,6 +3,8 @@ include(CMakeDependentOption)
 include(FixInterfaceIncludes)
 
 set(SOURCES_QT_SDL
+    OpenPak.cpp
+    OpenPak.h
     main.cpp
     main_shaders.h
     Screen.cpp
@@ -93,6 +95,11 @@ fix_interface_includes(PkgConfig::SDL2 PkgConfig::LibArchive)
 add_compile_definitions(ARCHIVE_SUPPORT_ENABLED)
 
 add_executable(melonDS ${SOURCES_QT_SDL})
+
+# OpenPak: the account, friends and cloud-save client library shared by the OpenPak forks.
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../Externals/openpak-client
+                 ${CMAKE_CURRENT_BINARY_DIR}/openpak-client)
+target_link_libraries(melonDS PRIVATE openpak::client)
 
 add_subdirectory("../../net"
     ${CMAKE_BINARY_DIR}/net)
