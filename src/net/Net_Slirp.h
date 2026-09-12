@@ -42,6 +42,9 @@ public:
     explicit Net_Slirp(const Platform::SendPacketCallback& callback) noexcept;
     // OpenPak: empty = off; otherwise the dotted-quad every Nintendo WFC / GameSpy / openpak.org name resolves to.
     static void SetOpenPakServer(const std::string& server) noexcept;
+    // OpenPak network profile: the applied redirect list. Exact names belong here too — a
+    // full hostname matches only itself as a suffix pattern. Empty: the compiled-in list.
+    static void SetOpenPakSuffixes(std::vector<std::string> suffixes) noexcept;
     Net_Slirp(const Net_Slirp&) = delete;
     Net_Slirp& operator=(const Net_Slirp&) = delete;
     Net_Slirp(Net_Slirp&& other) noexcept;
