@@ -150,7 +150,7 @@ static std::string OpenPakServer;
 
 void Net_Slirp::SetOpenPakServer(const std::string& server) noexcept { OpenPakServer = server; }
 
-// OpenPak network profile (prds/emulator-network-profile-prd.md §4d): the applied list
+// OpenPak network profile (emulators/prds/emulator-network-profile-prd.md §4d): the applied list
 // replaces the compiled-in one at launch; until then the compiled-in list applies.
 static std::vector<std::string> OpenPakSuffixes;
 
