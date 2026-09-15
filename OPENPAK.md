@@ -13,7 +13,7 @@ to the OpenPak server (`LAN.OpenPakServer` in melonDS.toml). The DS talks HTTP/H
 the server side handles the login certificate.
 
 The redirect list and the address are **not compiled in any more** (EP-4,
-`prds/emulator-network-profile-prd.md`). At launch melonDS fetches the network profile
+`emulators/prds/emulator-network-profile-prd.md`). At launch melonDS fetches the network profile
 (`openpak-client`, one conditional request, two seconds); what applies is:
 
 1. the fetched profile (`src/frontend/qt_sdl/OpenPak.cpp` applies it to `Net_Slirp`),
@@ -39,7 +39,7 @@ empty (the load path pulls before melonDS reads the save, so a fresh machine boo
 cloud save); when a ROM is ejected or the emulator exits, the `.sav` is pushed. A local save
 is never overwritten by the automatic path — conflicts resolve on openpak.org, which keeps
 every version. Server side: the same `/api/v1/me/saves/{platform}/{title}` the website and
-phone app use (`prds/cloud-saves-prd.md` CS-06, platform ids S-1).
+phone app use (`saves/prds/cloud-saves-prd.md` CS-06, platform ids S-1).
 
 The **Sync .sav files** config key is `OpenPak.CloudSync` in melonDS.toml.
 
