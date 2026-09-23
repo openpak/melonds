@@ -63,6 +63,7 @@
 #include "Platform.h"
 #include "Config.h"
 #include "version.h"
+#include "OpenPak.h"
 #include "Savestate.h"
 #include "MPInterface.h"
 #include "LANDialog.h"
@@ -605,6 +606,9 @@ MainWindow::MainWindow(int id, EmuInstance* inst, QWidget* parent) :
             actWifiSettings = menu->addAction("Wifi settings");
             connect(actWifiSettings, &QAction::triggered, this, &MainWindow::onOpenWifiSettings);
 
+            QAction* actOpenPakSettings = menu->addAction(tr("OpenPak settings..."));
+            connect(actOpenPakSettings, &QAction::triggered, this, [this] { OpenPak::ShowSettings(this); });
+
             actFirmwareSettings = menu->addAction("Firmware settings");
             connect(actFirmwareSettings, &QAction::triggered, this, &MainWindow::onOpenFirmwareSettings);
 
@@ -633,6 +637,9 @@ MainWindow::MainWindow(int id, EmuInstance* inst, QWidget* parent) :
                 dialog.exec();
             });
         }
+
+        // OpenPak: its own menu, immediately left of Help.
+        OpenPak::AddMenu(this, menubar);
 
         setMenuBar(menubar);
 
