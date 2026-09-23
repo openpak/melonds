@@ -3,7 +3,7 @@
 Fork of upstream melonDS with three additions: a way to point the emulated console at OpenPak,
 cloud saves driven by the emulator, and the OpenPak menu and window every OpenPak emulator
 shares (`emulators/prds/openpak-ux-spec.md`, DS family). Everything else is upstream, merged as it moves.
-Builds: `openpak-v*` tags publish a GitHub Release (`.github/workflows/openpak_release.yml`).
+Builds: `vX.Y.Z` tags (`v*.*.*`) publish a GitHub Release (`.github/workflows/openpak_release.yml`).
 The save-sync and account work builds and links; not yet run against a game.
 
 ## WFC redirect (Config → Wi-Fi settings)
