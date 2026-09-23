@@ -1,12 +1,12 @@
 name: OpenPak release
 
-# Tag openpak-v1.2.3: Linux x86_64 and aarch64 AppImages (upstream's Ubuntu recipe), Windows
+# Tag v1.2.3: Linux x86_64 and aarch64 AppImages (upstream's Ubuntu recipe), Windows
 # and macOS builds on a Release. The release is created first and every build attaches its own
 # file, so a release never waits on workflow artifacts (the organisation's artifact quota can be
 # full). workflow_dispatch builds without publishing.
 on:
   push:
-    tags: ['openpak-v*']
+    tags: ['v*.*.*']
   workflow_dispatch:
 
 permissions:
@@ -19,7 +19,7 @@ env:
 
 jobs:
   release:
-    if: startsWith(github.ref, 'refs/tags/openpak-v')
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: softprops/action-gh-release@v2
@@ -62,7 +62,7 @@ jobs:
       run: |
         ./linuxdeploy-${{ matrix.arch.name }}.AppImage --appdir AppDir --plugin qt --output appimage
         mv melonDS*.AppImage melonDS-openpak-${GITHUB_REF_NAME}-${{ matrix.arch.name }}.AppImage
-    - if: startsWith(github.ref, 'refs/tags/openpak-v')
+    - if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v2
       with:
         files: melonDS-openpak-*.AppImage
@@ -97,7 +97,7 @@ jobs:
         buildPreset: release-windows-${{ matrix.arch.name }}
     - shell: bash
       run: cp build/release-windows-${{ matrix.arch.name }}/melonDS.exe melonDS-openpak-${GITHUB_REF_NAME}-windows-${{ matrix.arch.name }}.exe
-    - if: startsWith(github.ref, 'refs/tags/openpak-v')
+    - if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v2
       with:
         files: melonDS-openpak-*.exe
@@ -132,7 +132,7 @@ jobs:
           configurePresetAdditionalArgs: "['-DMELONDS_EMBED_BUILD_INFO=ON']"
       - run: |
           cd build/release-mac-${{ matrix.arch }} && zip -r -y ../../melonDS-openpak-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.zip melonDS.app
-      - if: startsWith(github.ref, 'refs/tags/openpak-v')
+      - if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: melonDS-openpak-*.zip
