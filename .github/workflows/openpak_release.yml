@@ -1,10 +1,16 @@
 name: OpenPak release
 
-# Tag openpak-v1.2.3: Linux x86_64 and aarch64 AppImages (upstream's Ubuntu recipe) on a Release.
+# Tag openpak-v1.2.3: Linux x86_64 and aarch64 AppImages (upstream's Ubuntu recipe), Windows
+# and macOS builds on a Release. The release is created first and every build attaches its own
+# file, so a release never waits on workflow artifacts (the organisation's artifact quota can be
+# full). workflow_dispatch builds without publishing.
 on:
   push:
     tags: ['openpak-v*']
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   MELONDS_GIT_BRANCH: ${{ github.ref }}
@@ -12,7 +18,18 @@ env:
   MELONDS_BUILD_PROVIDER: OpenPak
 
 jobs:
+  release:
+    if: startsWith(github.ref, 'refs/tags/openpak-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: melonDS ${{ github.ref_name }} (OpenPak)
+          generate_release_notes: true
+
   build:
+    needs: [release]
+    if: always() && (needs.release.result == 'success' || needs.release.result == 'skipped')
     strategy:
       matrix:
         arch:
@@ -24,10 +41,12 @@ jobs:
     runs-on: ${{ matrix.arch.runner }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
     - run: |
         sudo apt update
         sudo apt install --allow-downgrades cmake ninja-build extra-cmake-modules libpcap0.8-dev libsdl2-dev libenet-dev \
-          qt6-{base,base-private,multimedia}-dev qt6-wayland libqt6svg6-dev libarchive-dev libzstd-dev libfuse2 libfaad-dev
+          qt6-{base,base-private,multimedia}-dev qt6-wayland libqt6svg6-dev libarchive-dev libzstd-dev libfuse2 libfaad-dev libssl-dev
     - run: cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DMELONDS_EMBED_BUILD_INFO=ON
     - run: |
         cmake --build build
@@ -43,12 +62,13 @@ jobs:
       run: |
         ./linuxdeploy-${{ matrix.arch.name }}.AppImage --appdir AppDir --plugin qt --output appimage
         mv melonDS*.AppImage melonDS-openpak-${GITHUB_REF_NAME}-${{ matrix.arch.name }}.AppImage
-    - uses: actions/upload-artifact@v4
+    - if: startsWith(github.ref, 'refs/tags/openpak-v')
+      uses: softprops/action-gh-release@v2
       with:
-        name: melonDS-openpak-${{ matrix.arch.name }}
-        path: melonDS-openpak-*.AppImage
-        retention-days: 3
+        files: melonDS-openpak-*.AppImage
   windows:
+    needs: [release]
+    if: always() && (needs.release.result == 'success' || needs.release.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -61,6 +81,8 @@ jobs:
       VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
     - uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/vcpkg_cache
@@ -75,12 +97,13 @@ jobs:
         buildPreset: release-windows-${{ matrix.arch.name }}
     - shell: bash
       run: cp build/release-windows-${{ matrix.arch.name }}/melonDS.exe melonDS-openpak-${GITHUB_REF_NAME}-windows-${{ matrix.arch.name }}.exe
-    - uses: actions/upload-artifact@v4
+    - if: startsWith(github.ref, 'refs/tags/openpak-v')
+      uses: softprops/action-gh-release@v2
       with:
-        name: melonDS-openpak-windows-${{ matrix.arch.name }}
-        path: melonDS-openpak-*.exe
-        retention-days: 3
+        files: melonDS-openpak-*.exe
   macos:
+    needs: [release]
+    if: always() && (needs.release.result == 'success' || needs.release.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -91,6 +114,8 @@ jobs:
       VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - run: brew install autoconf automake autoconf-archive libtool python-setuptools
       - uses: lukka/get-cmake@latest
       - uses: actions/cache@v4
@@ -107,22 +132,7 @@ jobs:
           configurePresetAdditionalArgs: "['-DMELONDS_EMBED_BUILD_INFO=ON']"
       - run: |
           cd build/release-mac-${{ matrix.arch }} && zip -r -y ../../melonDS-openpak-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.zip melonDS.app
-      - uses: actions/upload-artifact@v4
+      - if: startsWith(github.ref, 'refs/tags/openpak-v')
+        uses: softprops/action-gh-release@v2
         with:
-          name: melonDS-openpak-macos-${{ matrix.arch }}
-          path: melonDS-openpak-*.zip
-          retention-days: 3
-  release:
-    needs: [build, windows, macos]
-    if: startsWith(github.ref, 'refs/tags/openpak-v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-      - run: gh release create "${GITHUB_REF_NAME}" artifacts/* --repo "${GITHUB_REPOSITORY}" --title "melonDS ${GITHUB_REF_NAME} (OpenPak)" --generate-notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: melonDS-openpak-*.zip
