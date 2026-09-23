@@ -53,6 +53,7 @@ jobs:
       with:
         name: melonDS-windows-${{ matrix.arch.name }}
         path: .\build\release-windows-${{ matrix.arch.name }}\melonDS.exe
+        retention-days: 3
     - name: Save vcpkg cache
       uses: actions/cache/save@v4
       with:

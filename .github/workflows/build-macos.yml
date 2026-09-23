@@ -104,6 +104,7 @@ jobs:
           name: macOS-universal
           path: macOS-universal.zip
           archive: false
+          retention-days: 3
 #     - name: Clean up architecture-specific artifacts
 #       uses: geekyeggo/delete-artifact@v4
 #       with:

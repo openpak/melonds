@@ -47,6 +47,7 @@ jobs:
       with:
         name: melonDS-ubuntu-${{ matrix.arch.name }}
         path: AppDir/usr/bin/melonDS
+        retention-days: 3
     - name: Fetch AppImage tools
       run: |
         wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.arch.name }}.AppImage
@@ -64,3 +65,4 @@ jobs:
         name: melonDS-appimage-${{ matrix.arch.name }}
         path: melonDS*.AppImage
         archive: false
+        retention-days: 3

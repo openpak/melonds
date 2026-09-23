@@ -47,6 +47,7 @@ jobs:
       with:
         name: melonDS-openpak-${{ matrix.arch.name }}
         path: melonDS-openpak-*.AppImage
+        retention-days: 3
   windows:
     strategy:
       fail-fast: false
@@ -78,6 +79,7 @@ jobs:
       with:
         name: melonDS-openpak-windows-${{ matrix.arch.name }}
         path: melonDS-openpak-*.exe
+        retention-days: 3
   macos:
     strategy:
       fail-fast: false
@@ -109,6 +111,7 @@ jobs:
         with:
           name: melonDS-openpak-macos-${{ matrix.arch }}
           path: melonDS-openpak-*.zip
+          retention-days: 3
   release:
     needs: [build, windows, macos]
     if: startsWith(github.ref, 'refs/tags/openpak-v')

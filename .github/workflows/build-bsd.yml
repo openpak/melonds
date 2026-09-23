@@ -104,3 +104,4 @@ jobs:
       with:
         name: melonDS-${{ matrix.os }}-${{ matrix.arch }}
         path: build/melonDS
+        retention-days: 3
