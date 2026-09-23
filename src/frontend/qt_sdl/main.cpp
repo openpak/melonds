@@ -56,7 +56,7 @@
 
 #include "EmuInstance.h"
 #include "OpenPak.h"
-#include <openpak/network_profile.h>
+#include <QTimer>
 #include "ArchiveUtil.h"
 #include "CameraManager.h"
 #include "MPInterface.h"
@@ -113,10 +113,21 @@ void NetInit()
         net.SetDriver(std::make_unique<Net_Slirp>([](const u8* data, int len) {
             net.RXEnqueue(data, len);
         }));
-        Net_Slirp::SetOpenPakServer(cfg.GetBool("LAN.OpenPak") ? cfg.GetString("LAN.OpenPakServer") : "");
+        OpenPak::ApplyServer();
     }
 }
 
+
+// OpenPak: sign in, sign out and the connection switch wait while any instance runs a game.
+bool OpenPakGameRunning()
+{
+    for (int i = 0; i < kMaxEmuInstances; i++)
+    {
+        if (emuInstances[i] && emuInstances[i]->emuIsActive())
+            return true;
+    }
+    return false;
+}
 
 bool createEmuInstance()
 {
@@ -371,22 +382,8 @@ int main(int argc, char** argv)
                               "melonDS",
                               "Unable to write to config.\nPlease check the write permissions of the folder you placed melonDS in.");
 
+    // OpenPak: the client library's files, and the network profile, fetched off the UI thread.
     OpenPak::Init();
-
-    // One conditional request at launch: what is OpenPak, and what should this emulator
-    // send it? Offline it keeps the last-known-good profile or the compiled-in list.
-    {
-        const auto applied = openpak::NetworkProfile::Fetch("ds");
-        if (applied.source != openpak::NetworkProfile::Source::BuiltIn)
-        {
-            auto suffixes = applied.profile.suffixes;
-            suffixes.insert(suffixes.end(), applied.profile.exact.begin(),
-                            applied.profile.exact.end());
-            Net_Slirp::SetOpenPakSuffixes(suffixes);
-            if (Config::GetGlobalTable().GetBool("LAN.OpenPak") && !applied.profile.server_address.empty())
-                Net_Slirp::SetOpenPakServer(applied.profile.server_address);
-        }
-    }
 
     camStarted[0] = false;
     camStarted[1] = false;
@@ -442,6 +439,10 @@ int main(int argc, char** argv)
 
         if (options->fullscreen)
             win->toggleFullscreen();
+
+        // OpenPak: the connect prompt, once per install, on a plain interactive launch.
+        if (dsfile.isEmpty() && gbafile.isEmpty())
+            QTimer::singleShot(0, win, [] { OpenPak::MaybeAskToConnect(); });
     }
 
     int ret = melon.exec();

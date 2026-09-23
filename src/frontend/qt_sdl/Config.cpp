@@ -96,7 +96,9 @@ RangeList IntRanges =
 DefaultList<bool> DefaultBools =
 {
     {"LAN.OpenPak", false},
-    {"OpenPak.CloudSync", false},
+    {"OpenPak.CloudSync", true},
+    {"OpenPak.Notifications", true},
+    {"OpenPak.ConnectAsked", false},
     {"Screen.Filter", true},
     {"3D.Soft.Threaded", true},
     {"3D.GL.HiresCoordinates", true},
