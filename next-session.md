@@ -1,11 +1,15 @@
 # Next session — melonds
 
-Updated 2026-09-15.
+Updated 2026-09-24.
 
 Upstream melonDS (DS) plus the OpenPak WFC redirect, the launch-time network profile, and a
-website sign-in that names cloud saves (WFC minted no console identity). Released through
-`openpak-v0.1.2`; the cloud-save/profile/sign-in work and the full-OS release recipes are
-committed but untagged.
+website sign-in that names cloud saves (WFC minted no console identity). Latest tag `v0.2.2`;
+tags moved from `openpak-v*` to `v*.*.*` on 09-23 and CI builds only on those.
+
+Current status 2026-09-24: `v0.2.2`. WD-1/EP-4/EP-5, the release recipes and the UX-spec
+menu, window, dialogs and settings (DS family) shipped in `openpak-v0.2.0`; since then the
+signed redirect ceiling (openpak-client e180a57) and a Windows fix for redirect suffix
+matching.
 
 ## Where things stand
 
@@ -15,11 +19,10 @@ committed but untagged.
 - Account + cloud saves (WD-1): per-ROM `.sav` sync under platform `ds`, cartridge game code
   as key; pull on load when local is missing or empty, push on eject/exit; conflicts resolve
   on openpak.org. Builds and links; not yet run against a game.
-- Release recipes for every OS target upstream has (e762f85). Untagged.
+- Release recipes for every OS target upstream has (e762f85).
 
 ## Next steps
 
-- Local build, cut the next `openpak-v*` tag with WD-1/EP-4/EP-5.
 - First WFC match on OpenPak (E5 gate): a DS title matching against nn-wfc, alongside the
   Dolphin run of the same gate.
 
