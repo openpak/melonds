@@ -321,6 +321,7 @@ public:
     QString JoinFriendSession(u64) override { return {}; }
     void EnsureChatConnected() override {}
     NextendoChatClient* GetChatClient() override { return nullptr; }
+    void NetworkRedirectsChanged() override;
 
     static u64 IdOfAny(const std::string& text)
     {
@@ -536,6 +537,14 @@ void MelonHost::SignIn()
     ShowSignIn(main_window);
 }
 
+// OpenPak changed the DS redirects while melonDS runs. The profile is fetched once per start,
+// so only a new melonDS process picks them up.
+void MelonHost::NetworkRedirectsChanged()
+{
+    Toast(openpak::qt::RedirectsChangedText(openpak::qt::RedirectsApplied::AtEmulatorStart),
+          Kind::Account);
+}
+
 void MelonHost::SignOut()
 {
     openpak::qt::SignOutAndRevoke();
@@ -579,10 +588,10 @@ void CheckStoredSignIn()
     LoadAvatar();
 }
 
+// The built-in source is the library's list for the DS (inside the verified ceiling), the same
+// one the resolver starts with (Init); the fetched or cached profile replaces it.
 void ApplyProfile(const openpak::NetworkProfile::Result& applied)
 {
-    if (applied.source == openpak::NetworkProfile::Source::BuiltIn)
-        return;
     auto suffixes = applied.profile.suffixes;
     suffixes.insert(suffixes.end(), applied.profile.exact.begin(), applied.profile.exact.end());
     Net_Slirp::SetOpenPakSuffixes(suffixes);
@@ -741,6 +750,10 @@ void Init()
     Api::SetSavesPlatform("ds");
     if (const std::string device = Global().GetString("OpenPak.DeviceName"); !device.empty())
         Api::SetSaveDevice(device);
+
+    // Until the profile lands the resolver redirects the library's built-in DS families: no
+    // network here, only the cached ceiling (or the compiled fallback) read from disk.
+    Net_Slirp::SetOpenPakSuffixes(openpak::NetworkProfile::BuiltIn("ds").suffixes);
 
     // One conditional request at launch, off the UI thread: what is OpenPak, and what should
     // this emulator send it? Offline it keeps the last-known-good profile or the compiled-in
