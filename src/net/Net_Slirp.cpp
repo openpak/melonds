@@ -150,8 +150,9 @@ static std::string OpenPakServer;
 
 void Net_Slirp::SetOpenPakServer(const std::string& server) noexcept { OpenPakServer = server; }
 
-// OpenPak network profile (emulators/prds/emulator-network-profile-prd.md §4d): the applied list
-// replaces the compiled-in one at launch; until then the compiled-in list applies.
+// OpenPak network profile (emulators/prds/emulator-network-profile-prd.md §4d): the frontend sets
+// the client library's built-in list at launch and the applied profile's list once it lands, both
+// inside the verified ceiling (docs/signed-ceiling.md). Nothing set: nothing redirected.
 static std::vector<std::string> OpenPakSuffixes;
 
 void Net_Slirp::SetOpenPakSuffixes(std::vector<std::string> suffixes) noexcept
@@ -161,11 +162,8 @@ void Net_Slirp::SetOpenPakSuffixes(std::vector<std::string> suffixes) noexcept
 
 static bool OpenPakName(const char* name)
 {
-    static const char* const fallback[] = {".nintendowifi.net", ".gamespy.com", ".nintendo.net", ".openpak.org"};
-    std::vector<std::string> const& suffixes =
-        OpenPakSuffixes.empty() ? std::vector<std::string>(std::begin(fallback), std::end(fallback)) : OpenPakSuffixes;
     size_t len = strlen(name);
-    for (const std::string& suffix : suffixes)
+    for (const std::string& suffix : OpenPakSuffixes)
     {
         size_t n = suffix.size();
         if (len >= n && strcasecmp(name + len - n, suffix.c_str()) == 0) return true;
