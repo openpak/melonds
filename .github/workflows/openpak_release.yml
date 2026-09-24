@@ -43,6 +43,8 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+        # openpak-client is private: the checkout needs a token that can read it (repo secret).
+        token: ${{ secrets.OPENPAK_MODULE_TOKEN || github.token }}
     - run: |
         sudo apt update
         sudo apt install --allow-downgrades cmake ninja-build extra-cmake-modules libpcap0.8-dev libsdl2-dev libenet-dev \
@@ -83,6 +85,8 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+        # openpak-client is private: the checkout needs a token that can read it (repo secret).
+        token: ${{ secrets.OPENPAK_MODULE_TOKEN || github.token }}
     - uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/vcpkg_cache
@@ -116,6 +120,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          # openpak-client is private: the checkout needs a token that can read it (repo secret).
+          token: ${{ secrets.OPENPAK_MODULE_TOKEN || github.token }}
       - run: brew install autoconf automake autoconf-archive libtool python-setuptools
       - uses: lukka/get-cmake@latest
       - uses: actions/cache@v4
