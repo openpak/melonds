@@ -22,7 +22,8 @@
 #include "Net_Slirp.h"
 #include <string>
 #include <cstring>
-#include <strings.h>
+#include <algorithm>
+#include <cctype>
 #include "FIFO.h"
 #include "Platform.h"
 
@@ -166,7 +167,10 @@ static bool OpenPakName(const char* name)
     for (const std::string& suffix : OpenPakSuffixes)
     {
         size_t n = suffix.size();
-        if (len >= n && strcasecmp(name + len - n, suffix.c_str()) == 0) return true;
+        // Case-insensitive, portably: Windows has no strcasecmp.
+        if (len >= n && std::equal(suffix.begin(), suffix.end(), name + len - n,
+                                   [](char a, char b) { return std::tolower((unsigned char)a) == std::tolower((unsigned char)b); }))
+            return true;
     }
     return false;
 }
