@@ -8,18 +8,31 @@ on:
   push:
     tags: ['v*.*.*']
   workflow_dispatch:
+  # nightly.yml calls this with channel: nightly: the same builds, attached to the rolling
+  # `nightly` pre-release (which nightly.yml creates) instead of a vX.Y.Z release.
+  workflow_call:
+    inputs:
+      channel:
+        type: string
+        default: release
+      version:
+        type: string
+        default: ''
 
 permissions:
   contents: write
 
 env:
-  MELONDS_GIT_BRANCH: ${{ github.ref }}
+  # File label and the release to attach to: the tag on a vX.Y.Z push, `nightly` from nightly.yml.
+  LABEL: ${{ inputs.channel == 'nightly' && 'nightly' || github.ref_name }}
+  PUBLISH_TAG: ${{ inputs.channel == 'nightly' && 'nightly' || (startsWith(github.ref, 'refs/tags/v') && github.ref_name || '') }}
+  MELONDS_GIT_BRANCH: ${{ inputs.version || github.ref }}
   MELONDS_GIT_HASH: ${{ github.sha }}
   MELONDS_BUILD_PROVIDER: OpenPak
 
 jobs:
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: inputs.channel != 'nightly' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     steps:
       - uses: softprops/action-gh-release@v2
@@ -63,10 +76,11 @@ jobs:
         QMAKE: /usr/lib/qt6/bin/qmake
       run: |
         ./linuxdeploy-${{ matrix.arch.name }}.AppImage --appdir AppDir --plugin qt --output appimage
-        mv melonDS*.AppImage melonDS-openpak-${GITHUB_REF_NAME}-${{ matrix.arch.name }}.AppImage
-    - if: startsWith(github.ref, 'refs/tags/v')
+        mv melonDS*.AppImage melonDS-openpak-${LABEL}-${{ matrix.arch.name }}.AppImage
+    - if: env.PUBLISH_TAG != ''
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ env.PUBLISH_TAG }}
         files: melonDS-openpak-*.AppImage
   windows:
     needs: [release]
@@ -100,10 +114,11 @@ jobs:
         configurePresetAdditionalArgs: "['-DENABLE_DEBUG_DEPS=OFF', '-DMELONDS_EMBED_BUILD_INFO=ON']"
         buildPreset: release-windows-${{ matrix.arch.name }}
     - shell: bash
-      run: cp build/release-windows-${{ matrix.arch.name }}/melonDS.exe melonDS-openpak-${GITHUB_REF_NAME}-windows-${{ matrix.arch.name }}.exe
-    - if: startsWith(github.ref, 'refs/tags/v')
+      run: cp build/release-windows-${{ matrix.arch.name }}/melonDS.exe melonDS-openpak-${LABEL}-windows-${{ matrix.arch.name }}.exe
+    - if: env.PUBLISH_TAG != ''
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ env.PUBLISH_TAG }}
         files: melonDS-openpak-*.exe
   macos:
     needs: [release]
@@ -137,8 +152,9 @@ jobs:
           buildPreset: release-mac-${{ matrix.arch }}
           configurePresetAdditionalArgs: "['-DMELONDS_EMBED_BUILD_INFO=ON']"
       - run: |
-          cd build/release-mac-${{ matrix.arch }} && zip -r -y ../../melonDS-openpak-${GITHUB_REF_NAME}-macos-${{ matrix.arch }}.zip melonDS.app
-      - if: startsWith(github.ref, 'refs/tags/v')
+          cd build/release-mac-${{ matrix.arch }} && zip -r -y ../../melonDS-openpak-${LABEL}-macos-${{ matrix.arch }}.zip melonDS.app
+      - if: env.PUBLISH_TAG != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.PUBLISH_TAG }}
           files: melonDS-openpak-*.zip
