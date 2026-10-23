@@ -1,71 +1,64 @@
-<p align="center"><img src="https://raw.githubusercontent.com/melonDS-emu/melonDS/master/res/icon/melon_128x128.png"></p>
-<h2 align="center"><b>melonDS</b></h2>
-<p align="center">
-<a href="http://melonds.kuribo64.net/" alt="melonDS website"><img src="https://img.shields.io/badge/website-melonds.kuribo64.net-%2331352e.svg"></a>
-<a href="http://melonds.kuribo64.net/downloads.php" alt="Release: 1.1"><img src="https://img.shields.io/badge/release-1.1-%235c913b.svg"></a>
-<a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-GPL%20v3-%23ff554d.svg"></a>
-<a href="https://kiwiirc.com/client/irc.badnik.net/?nick=IRC-Source_?#melonds" alt="IRC channel: #melonds"><img src="https://img.shields.io/badge/IRC%20chat-%23melonds-%23dd2e44.svg"></a>
-<a href="https://discord.gg/pAMAtExcqV" alt="Discord"><img src="https://img.shields.io/badge/Discord-Kuribo64-7289da?logo=discord&logoColor=white"></a>
-<br>
-<a href="https://github.com/melonDS-emu/melonDS/actions/workflows/build-windows.yml?query=event%3Apush"><img src="https://github.com/melonDS-emu/melonDS/actions/workflows/build-windows.yml/badge.svg" /></a>
-<a href="https://github.com/melonDS-emu/melonDS/actions/workflows/build-ubuntu.yml?query=event%3Apush"><img src="https://github.com/melonDS-emu/melonDS/actions/workflows/build-ubuntu.yml/badge.svg" /></a>
-<a href="https://github.com/melonDS-emu/melonDS/actions/workflows/build-macos.yml?query=event%3Apush"><img src="https://github.com/melonDS-emu/melonDS/actions/workflows/build-macos.yml/badge.svg" /></a>
-<a href="https://github.com/melonDS-emu/melonDS/actions/workflows/build-bsd.yml?query=event%3Apush"><img src="https://github.com/melonDS-emu/melonDS/actions/workflows/build-bsd.yml/badge.svg" /></a>
-</p>
-DS emulator, sorta
+# melonDS for OpenPak
 
-The goal is to do things right and fast, akin to blargSNES (but hopefully better). But also to, you know, have a fun challenge :)
-<hr>
+melonDS for OpenPak is OpenPak's Nintendo DS emulator fork, built on [melonDS](https://github.com/melonDS-emu/melonDS). It is an independent project. Upstream melonDS remains our base, and we merge upstream changes as they land. This is not an official melonDS release.
 
-## How to use
+The fork adds a Nintendo WFC redirect to OpenPak, cloud saves driven by the emulator, and the OpenPak sign-in, menu and settings that every OpenPak emulator shares. Everything else is upstream melonDS.
 
-Firmware boot (not direct boot) requires a BIOS/firmware dump from an original DS or DS Lite.
-DS firmwares dumped from a DSi or 3DS aren't bootable and only contain configuration data, thus they are only suitable when booting games directly.
+**Status:** Transitional (kept for now, successor planned, no builds advertised).
 
-### Possible firmware sizes
+## Not affiliated
 
- * 128KB: DSi/3DS DS-mode firmware (reduced size due to lacking bootcode)
- * 256KB: regular DS firmware
- * 512KB: iQue DS firmware
+This is an independent project and is not endorsed by the melonDS project. It is not affiliated with Nintendo, and all trademarks belong to their owners.
 
-DS BIOS dumps from a DSi or 3DS can be used with no compatibility issues. DSi BIOS dumps (in DSi mode) are not compatible. Or maybe they are. I don't know.
+## What works today
 
-As for the rest, the interface should be pretty straightforward. If you have a question, don't hesitate to ask, though!
+Sourced from the fork's own notes. The save-sync and account work builds and links. None of it has been run against a game yet.
 
-## How to build
-See [BUILD.md](./BUILD.md) for build instructions.
+- A "Connect Nintendo WFC to OpenPak" checkbox in the Wi-Fi settings. melonDS answers DNS itself in indirect mode, and with the option on, names on the redirect list resolve to the OpenPak server.
+- A launch-time fetch of the OpenPak network profile for the redirect list and address, validated against a compiled-in allowlist. If the fetch fails it uses the last stored profile, then a built-in list. A "Refresh network settings" button re-runs it, and each launch logs which source was used.
+- The shared OpenPak menu and window: website sign-in and sign-out, account page, read-only friends list, cloud saves and status.
+- Cloud saves for each ROM's `.sav`, keyed by the cartridge game code. The newest cloud copy comes down when a ROM loads (the replaced local file is kept as a backup), the save goes up on eject or exit, and a conflict flow lets you choose.
 
-## TODO LIST
+Not verified: a WFC match on OpenPak with any DS title, any save sync against a real cartridge image, and any hardware behaviour.
 
- * better DSi emulation
- * better OpenGL rendering
- * netplay
- * the impossible quest of pixel-perfect 3D graphics
- * support for rendering screens to separate windows
- * emulating some fancy addons
- * other non-core shit (debugger, graphics viewers, etc)
+## Connecting to OpenPak
 
-### TODO LIST FOR LATER (low priority)
+Create an account at https://openpak.org. In the emulator, use the OpenPak menu (left of Help) to sign in, then turn on the WFC connection in the Wi-Fi settings or in Config, OpenPak settings. A first interactive launch asks once whether to connect.
 
- * big-endian compatibility (Wii, etc)
- * LCD refresh time (used by some games for blending effects)
- * any feature you can eventually ask for that isn't outright stupid
+WFC has no console accounts, so the OpenPak sign-in is a website sign-in that names the player and authorises save uploads.
 
-## Credits
+You must supply your own ROMs and, for firmware boot, a firmware and BIOS dump from a DS you own. OpenPak provides none and never will.
 
- * Martin for GBAtek, a good piece of documentation
- * Cydrak for the extra 3D GPU research
- * limittox for the icon
- * All of you comrades who have been testing melonDS, reporting issues, suggesting shit, etc
+## Downloads
 
-## Licenses
+No public build yet. Release tags exist and the repository has a release workflow, but no release has been published and none is advertised while this fork is transitional. Check https://github.com/openpak/melonds/releases for any change.
 
-[![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)
+## Building from source
 
-melonDS is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Build instructions are upstream's, in `BUILD.md` in this repository (Linux, Windows and macOS).
 
-### External
-* Images used in the Input Config Dialog - see `src/frontend/qt_sdl/InputConfig/resources/LICENSE.md`
+OpenPak-specific notes:
+
+- Clone with submodules (`git clone --recursive`). The fork adds a submodule, `Externals/openpak-client`, which is currently a private repository. Without access to it the OpenPak code does not build, so outside contributors cannot yet build this fork as it stands.
+- Release builds run from `v*.*.*` tags through `.github/workflows/openpak_release.yml`.
+
+## Known limitations
+
+- Not yet run against a game. The first WFC match on OpenPak is the next gate.
+- Friends are read-only in the OpenPak window. Invitations, Mods and News show placeholder panels.
+- Cloud saves cover DS `.sav` files only.
+- The OpenPak window learns of a ROM's save only after that ROM has been loaded once.
+
+## Contributing and support
+
+Issues: https://github.com/openpak/melonds/issues. For anything that is not specific to OpenPak, upstream melonDS is the better place. See `CONTRIBUTING.md` for the upstream guidelines.
+
+Security problems: report them privately to the OpenPak maintainers through the contact on https://openpak.org. Please do not open a public issue.
+
+The most useful help right now is a first WFC test with a DS title against OpenPak, with the log attached.
+
+## License and acknowledgements
+
+melonDS is licensed under GPL-3.0-or-later; the full text is in `LICENSE`. This fork keeps that licence. We credit the melonDS team and the contributors credited in upstream's README, including Martin (GBAtek), Cydrak (3D GPU research) and limittox (icon).
+
+The original upstream README is preserved as [README.upstream.md](README.upstream.md).
